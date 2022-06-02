@@ -4,7 +4,7 @@ import keras
 from keras.layers import *
 # from tensorflow.keras.layers import *
 
-# Paper: https://arxiv.org/pdf/1512.03385.pdf
+# Paper: https://arxiv.org/pdf/1409.1556.pdf
 
 
 def add_block(block_num, input, filters, layers, pad):
@@ -15,7 +15,7 @@ def add_block(block_num, input, filters, layers, pad):
     return MaxPool2D(pool_size=(3, 3), strides=2, padding=pad, name='{}.{}_3x3_MaxPool'.format(block_num, l))(input)
 
 
-def build_model(size=512, pad='same', n_channels=1, n_classes=2, bn=True):
+def build_model(size=512, pad='same', n_channels=1, n_classes=2, bn=True, version=19):
     """
     :param size: Size of input image
     :param pad: Padding of the convolution operation (same=padding, valid=no padding)
@@ -27,11 +27,13 @@ def build_model(size=512, pad='same', n_channels=1, n_classes=2, bn=True):
 
     :return: model
     """
+    sections = {13: [2, 2, 2, 2, 2], 16: [2, 2, 3, 3, 3], 19: [2, 2, 4, 4, 4]}[version]
+
     # Input might not fit depending on size due to cropping
     inputs = Input(shape=(size, size, n_channels), name='input')
     block = inputs
     f = 64
-    for num, l in enumerate([2, 2, 4, 4, 4]):
+    for num, l in enumerate(sections):
         block = add_block(num, block, filters=f, layers=l, pad=pad)
         if f < 512:
             f *= 2
@@ -45,5 +47,5 @@ def build_model(size=512, pad='same', n_channels=1, n_classes=2, bn=True):
 
 
 if __name__ == '__main__':
-    model = build_model(size=224)
+    model = build_model(size=224, n_channels=3, version=19)
     print(model.summary())

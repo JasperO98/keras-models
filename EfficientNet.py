@@ -2,7 +2,7 @@ import keras
 from keras.layers import *
 
 
-# Paper: https://link.springer.com/content/pdf/10.1007%2F978-3-319-24574-4_28.pdf
+# Paper: https://arxiv.org/pdf/1905.11946.pdf
 
 
 def build_model(size=512, pad='same', n_channels=1, n_classes=2, bn=True):
