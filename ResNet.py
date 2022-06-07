@@ -29,8 +29,12 @@ def add_block(layer, num, num_blocks, filters, pad, plain, SE, r, version):
     :param filters: The number of filters of the current section
     :param pad: Padding of the convolution operation (same=padding, valid=no padding)
     :param plain: Whether or not to add the residual connections (False) or keep the network plain (True)
+    :param SE: Whether to add SE block after residual
+    :param r: Reduction ratio in SE block. A high reduction ratio reduces computation cost,
+              but might affect performance. (default: 16)
+    :param version: Which version of ResNet to use
 
-    Creates plain or residual blocks.
+    Creates plain or residual layers.
 
     :return: Full section of plain or residual blocks.
     """
@@ -72,13 +76,17 @@ def add_block(layer, num, num_blocks, filters, pad, plain, SE, r, version):
     return layer
 
 
-def build_model(size=224, pad='same', n_channels=1, n_classes=2, version=34, plain=False, SE=False, r=16):
+def build_model(size=224, pad='same', n_channels=1, n_classes=2, plain=False, SE=False, r=16, version=34):
     """
     :param size: Size of input image
     :param pad: Padding of the convolution operation (same=padding, valid=no padding)
     :param n_channels: Number of channels of the input image
     :param n_classes: Number of classes to predict
-    :param bn: Whether to perform batch normalization after each convolution
+    :param plain: Whether or not to add the residual connections (False) or keep the network plain (True)
+    :param SE: Whether to add SE block after residual
+    :param r: Reduction ratio in SE block. A high reduction ratio reduces computation cost,
+              but might affect performance. (default: 16)
+    :param version: Which version of ResNet to use
 
     Builds the ResNet model
 

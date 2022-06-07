@@ -1,8 +1,6 @@
-from math import ceil
-import copy
 import keras
 from keras.layers import *
-# from tensorflow.keras.layers import *
+
 
 # Paper: https://arxiv.org/pdf/1409.1556.pdf
 
@@ -15,15 +13,15 @@ def add_block(block_num, input, filters, layers, pad):
     return MaxPool2D(pool_size=(3, 3), strides=2, padding=pad, name='{}.{}_3x3_MaxPool'.format(block_num, l))(input)
 
 
-def build_model(size=512, pad='same', n_channels=1, n_classes=2, bn=True, version=19):
+def build_model(size=512, pad='same', n_channels=1, n_classes=2, version=19):
     """
     :param size: Size of input image
     :param pad: Padding of the convolution operation (same=padding, valid=no padding)
     :param n_channels: Number of channels of the input image
     :param n_classes: Number of classes to predict
-    :param bn: Whether to perform batch normalization after each convolution
+    :param version: Which version to build
 
-    Builds the Unet model
+    Builds the VGG model
 
     :return: model
     """

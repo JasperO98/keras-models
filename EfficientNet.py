@@ -5,15 +5,14 @@ from keras.layers import *
 # Paper: https://arxiv.org/pdf/1905.11946.pdf
 
 
-def build_model(size=512, pad='same', n_channels=1, n_classes=2, bn=True):
+def build_model(size=512, pad='same', n_channels=1, n_classes=2):
     """
     :param size: Size of input image
     :param pad: Padding of the convolution operation (same=padding, valid=no padding)
     :param n_channels: Number of channels of the input image
     :param n_classes: Number of classes to predict
-    :param bn: Whether to perform batch normalization after each convolution
 
-    Builds the Unet model
+    Builds the EfficientNet model
 
     :return: model
     """
