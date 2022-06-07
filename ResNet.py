@@ -1,4 +1,3 @@
-from timeit import repeat
 import keras
 from keras.layers import *
 
@@ -6,8 +5,23 @@ from keras.layers import *
 # Paper: https://arxiv.org/pdf/1512.03385.pdf
 
 
+def SE_block(input_x, r):
+    out_dim = input_x.shape[-1]
+    name = input_x.name.split('/')[0]
+    
+    # Squeeze, but keep dims/filters
+    squeeze = GlobalAveragePooling2D(keepdims=True, name=name + '_Squeeze')(input_x)
 
-def add_block(layer, num, num_blocks, filters, pad, plain, version):
+    # Learning Weights
+    excitation = Dense(out_dim / r, activation='relu', name=name + '_ExciteReduction')(squeeze)
+    excitation = Dense(out_dim, activation='sigmoid', name=name + '_Excite')(excitation)
+
+    # Reweight feature maps
+    scale = Multiply(name=name + '_Scale')([input_x, excitation])
+    return scale
+
+
+def add_block(layer, num, num_blocks, filters, pad, plain, SE, r, version):
     """
     :param layer: Input layer
     :param num: Section number of the network
@@ -41,6 +55,9 @@ def add_block(layer, num, num_blocks, filters, pad, plain, version):
                         name='{}.{}.{}_1x1_Conv2D_{}_s1'.format(num+1, b+1, 3, filters*4))(layer)
         else:
             exit(1)
+        # Add Squeeze and Excitation if needed
+        if SE:
+            layer = SE_block(layer, r=r)
         # Add skip connect if it is not a plain ResNet
         if not plain:
             tmp = layer
@@ -55,7 +72,7 @@ def add_block(layer, num, num_blocks, filters, pad, plain, version):
     return layer
 
 
-def build_model(size=224, pad='same', n_channels=1, n_classes=2, version=34, plain=False):
+def build_model(size=224, pad='same', n_channels=1, n_classes=2, version=34, plain=False, SE=False, r=16):
     """
     :param size: Size of input image
     :param pad: Padding of the convolution operation (same=padding, valid=no padding)
@@ -79,7 +96,7 @@ def build_model(size=224, pad='same', n_channels=1, n_classes=2, version=34, pla
     layer = MaxPooling2D(pool_size=(3, 3), strides=2, padding=pad, name='0.2_3x3_MaxPool_s2')(layer)
     # Add sections, depending on version
     for i, section_size in enumerate(sections):
-        layer = add_block(layer, num=i, num_blocks=section_size, filters=f, pad=pad, plain=plain, version=version)
+        layer = add_block(layer, num=i, num_blocks=section_size, filters=f, pad=pad, plain=plain, SE=SE, r=r, version=version)
         f *= 2
     # Final Average Pool
     avg_pool = GlobalAveragePooling2D()(layer)
@@ -89,5 +106,5 @@ def build_model(size=224, pad='same', n_channels=1, n_classes=2, version=34, pla
 
 
 if __name__ == '__main__':
-    model = build_model(version=34, plain=False)
+    model = build_model(version=34, plain=False, SE=True)
     print(model.summary())
